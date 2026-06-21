@@ -1,0 +1,185 @@
+@use '@/styles/variables.scss' as *;
+
+.vehicleCard {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.99);
+    box-shadow: $shadow-card-hover;
+  }
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.plateNo {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.tagsRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.infoLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.infoValue {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+.tempRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-sm $spacing-md;
+  background-color: rgba(0, 136, 204, 0.04);
+  border-radius: $radius-md;
+  margin-bottom: $spacing-md;
+}
+
+.tempLeft {
+  display: flex;
+  align-items: baseline;
+  gap: $spacing-xs;
+}
+
+.currentTemp {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+}
+
+.tempRange {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.tempStatus {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.tempStatusText {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.normal {
+  color: $color-success;
+}
+
+.warning {
+  color: $color-warning;
+}
+
+.danger {
+  color: $color-error;
+}
+
+.chartTitle {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-xs;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+}
+
+.driverInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.driverName {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.deliveryNo {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.viewDetail {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.statusLoading {
+  background-color: rgba(134, 144, 156, 0.1);
+  color: $color-text-tertiary;
+}
+
+.statusTransit {
+  background-color: rgba(0, 136, 204, 0.1);
+  color: $color-primary;
+}
+
+.statusArriving {
+  background-color: rgba(255, 143, 31, 0.1);
+  color: $color-warning;
+}
+
+.statusArrived {
+  background-color: rgba(0, 181, 120, 0.1);
+  color: $color-success;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+}

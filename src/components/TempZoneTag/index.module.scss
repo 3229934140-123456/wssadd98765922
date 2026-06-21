@@ -1,0 +1,27 @@
+@use '@/styles/variables.scss' as *;
+
+.zoneTag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6rpx 20rpx;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+}
+
+.frozen {
+  background-color: $color-zone-frozen-bg;
+  color: $color-zone-frozen;
+}
+
+.chilled {
+  background-color: $color-zone-chilled-bg;
+  color: $color-zone-chilled;
+}
+
+.ambient {
+  background-color: $color-zone-ambient-bg;
+  color: $color-zone-ambient;
+}
