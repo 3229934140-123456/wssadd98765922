@@ -41,7 +41,7 @@
 
 .statCards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: $spacing-md;
   padding: $spacing-lg $page-spacing;
 }
@@ -78,6 +78,10 @@
 
 .statReview .statNumber {
   color: $color-primary;
+}
+
+.statToday .statNumber {
+  color: $color-primary-dark;
 }
 
 .recordList {

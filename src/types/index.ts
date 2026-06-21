@@ -57,13 +57,26 @@ export interface Vehicle {
   batches: BatchInfo[];
 }
 
+export interface TempAnomalySnapshot {
+  id: string;
+  startTime: string;
+  endTime: string;
+  duration: number;
+  location: string;
+  maxTemp: number;
+  status: TempStatus;
+  driverRemark: string;
+}
+
 export interface AcceptanceRecord {
   id: string;
   deliveryNo: string;
   plateNo: string;
   storeName: string;
+  storeNo?: string;
   acceptTime: string;
   receiver: string;
+  receiverId?: string;
   result: AcceptanceResult;
   status: AcceptanceStatus;
   tempZone: TempZone;
@@ -71,4 +84,12 @@ export interface AcceptanceRecord {
   remark: string;
   photos: string[];
   batches: BatchInfo[];
+  vehicleId?: string;
+  tempAnomalies?: TempAnomalySnapshot[];
+  fullTemps?: TempPoint[];
+  driverName?: string;
+  driverPhone?: string;
+  reviewer?: string;
+  reviewTime?: string;
+  reviewRemark?: string;
 }

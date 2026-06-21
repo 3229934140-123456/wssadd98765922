@@ -6,7 +6,8 @@ export default defineAppConfig({
     'pages/vehicle-detail/index',
     'pages/acceptance/index',
     'pages/scan/index',
-    'pages/anomaly-detail/index'
+    'pages/anomaly-detail/index',
+    'pages/record-detail/index'
   ],
   window: {
     backgroundTextStyle: 'light',

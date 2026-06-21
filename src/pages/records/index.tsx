@@ -4,55 +4,66 @@ import Taro, { useDidShow } from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
 import RecordCard from '@/components/RecordCard';
-import { acceptanceRecords } from '@/data/records';
-import { AcceptanceRecord, AcceptanceResult } from '@/types';
+import { useAppStore } from '@/store';
+import { AcceptanceRecord, AcceptanceResult, AcceptanceStatus } from '@/types';
 
-type FilterType = 'all' | AcceptanceResult;
+type FilterType = 'all' | AcceptanceResult | AcceptanceStatus;
 
 const RecordsPage: React.FC = () => {
   const [filter, setFilter] = useState<FilterType>('all');
-  const [records, setRecords] = useState<AcceptanceRecord[]>(acceptanceRecords);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'review'>('all');
+  const records = useAppStore(s => s.records);
 
   useDidShow(() => {
-    setRecords(acceptanceRecords);
+    // store 是响应式的，无需重新 set
   });
 
   const filteredRecords = useMemo(() => {
-    if (filter === 'all') return records;
-    return records.filter(r => r.result === filter);
-  }, [records, filter]);
+    let list = records;
+    if (statusFilter === 'review') {
+      list = list.filter(r => r.status === 'reviewing');
+    }
+    if (statusFilter === 'pending') {
+      list = list.filter(r => r.status === 'pending');
+    }
+    if (filter === 'all') return list;
+    return list.filter(r => r.result === filter || r.status === filter);
+  }, [records, filter, statusFilter]);
 
   const stats = useMemo(() => {
     return {
       total: records.length,
       normal: records.filter(r => r.result === 'normal').length,
       partial: records.filter(r => r.result === 'partial').length,
-      review: records.filter(r => r.result === 'review').length
+      review: records.filter(r => r.status === 'reviewing').length,
+      today: records.filter(r => {
+        const d = new Date(r.acceptTime);
+        const n = new Date();
+        return d.toDateString() === n.toDateString();
+      }).length
     };
   }, [records]);
 
-  const filterBtns: { key: FilterType; label: string }[] = [
-    { key: 'all', label: '全部' },
-    { key: 'normal', label: '正常入库' },
-    { key: 'partial', label: '部分拒收' },
-    { key: 'review', label: '等待复核' }
+  const filterBtns: { key: FilterType; label: string; count: number }[] = [
+    { key: 'all', label: '全部', count: records.length },
+    { key: 'normal', label: '正常入库', count: stats.normal },
+    { key: 'partial', label: '部分拒收', count: stats.partial },
+    { key: 'reviewing', label: '等待复核', count: stats.review } as any
   ];
+
+  const handleRecordClick = (record: AcceptanceRecord) => {
+    Taro.navigateTo({
+      url: `/pages/record-detail/index?id=${record.id}`
+    });
+  };
 
   return (
     <View className={styles.pageContainer}>
-      <ScrollView className={styles.filterBar} scrollX enableFlex>
-        {filterBtns.map(btn => (
-          <Button
-            key={btn.key}
-            className={classnames(styles.filterBtn, filter === btn.key && styles.activeFilter)}
-            onClick={() => setFilter(btn.key)}
-          >
-            {btn.label}
-          </Button>
-        ))}
-      </ScrollView>
-
       <View className={styles.statCards}>
+        <View className={classnames(styles.statCard, styles.statToday)}>
+          <Text className={styles.statNumber}>{stats.today}</Text>
+          <Text className={styles.statLabel}>今日验收</Text>
+        </View>
         <View className={classnames(styles.statCard, styles.statNormal)}>
           <Text className={styles.statNumber}>{stats.normal}</Text>
           <Text className={styles.statLabel}>正常入库</Text>
@@ -63,9 +74,21 @@ const RecordsPage: React.FC = () => {
         </View>
         <View className={classnames(styles.statCard, styles.statReview)}>
           <Text className={styles.statNumber}>{stats.review}</Text>
-          <Text className={styles.statLabel}>等待复核</Text>
+          <Text className={styles.statLabel}>待复核</Text>
         </View>
       </View>
+
+      <ScrollView className={styles.filterBar} scrollX enableFlex>
+        {filterBtns.map(btn => (
+          <Button
+            key={btn.key}
+            className={classnames(styles.filterBtn, filter === btn.key && styles.activeFilter)}
+            onClick={() => setFilter(btn.key)}
+          >
+            {btn.label}{btn.count > 0 && ` (${btn.count})`}
+          </Button>
+        ))}
+      </ScrollView>
 
       <View className={styles.sectionHeader}>
         <Text className={styles.sectionTitle}>验收记录</Text>
@@ -75,7 +98,11 @@ const RecordsPage: React.FC = () => {
       <View className={styles.recordList}>
         {filteredRecords.length > 0 ? (
           filteredRecords.map(record => (
-            <RecordCard key={record.id} record={record} />
+            <RecordCard
+              key={record.id}
+              record={record}
+              onClick={() => handleRecordClick(record)}
+            />
           ))
         ) : (
           <View className={styles.emptyState}>

@@ -8,9 +8,10 @@ import TempZoneTag from '@/components/TempZoneTag';
 import StatusTag from '@/components/StatusTag';
 import { getVehicleByDeliveryNo } from '@/data/vehicles';
 import { currentUser } from '@/data/acceptance';
-import { Vehicle, AcceptanceResult, BatchInfo } from '@/types';
+import { Vehicle, AcceptanceResult, AcceptanceStatus, BatchInfo, AcceptanceRecord } from '@/types';
 import { formatTime, getDurationText } from '@/utils';
 import { checkTempsCompliance, getTempStatusText, formatTemp, getTempRange } from '@/utils/temperature';
+import { useAppStore } from '@/store';
 
 const AcceptancePage: React.FC = () => {
   const router = useRouter();
@@ -20,6 +21,8 @@ const AcceptancePage: React.FC = () => {
   const [selectedResult, setSelectedResult] = useState<AcceptanceResult | null>(null);
   const [remark, setRemark] = useState('');
   const [photos, setPhotos] = useState<string[]>([]);
+  const addRecord = useAppStore(s => s.addRecord);
+  const { currentStoreNo, currentStoreName } = useAppStore();
 
   useDidShow(() => {
     const deliveryNo = router.params.deliveryNo as string;
@@ -91,23 +94,58 @@ const AcceptancePage: React.FC = () => {
   };
 
   const handleSubmit = () => {
-    if (!selectedResult) {
+    if (!selectedResult || !vehicle) {
       Taro.showToast({ title: '请选择验收结果', icon: 'none' });
       return;
     }
+    const resultText = { normal: '正常入库', partial: '部分拒收', review: '等待主管复核' }[selectedResult];
     Taro.showModal({
       title: '确认提交',
-      content: `确认提交验收结果吗？`,
+      content: `确认将此批货物标记为"${resultText}"吗？`,
       success: (res) => {
         if (res.confirm) {
           Taro.showLoading({ title: '提交中...' });
           setTimeout(() => {
+            const acceptedBatches = vehicle.batches.filter(b => checkedBatches.includes(b.batchNo));
+            const status: AcceptanceStatus = selectedResult === 'review' ? 'reviewing' : 'accepted';
+            const newRecord: AcceptanceRecord = {
+              id: 'R' + Date.now(),
+              deliveryNo: vehicle.deliveryNo,
+              plateNo: vehicle.plateNo,
+              storeName: currentStoreName,
+              storeNo: currentStoreNo,
+              acceptTime: new Date().toISOString(),
+              receiver: currentUser.name,
+              receiverId: currentUser.employeeId,
+              result: selectedResult,
+              status,
+              tempZone: vehicle.tempZone,
+              tempCompliance: tempStatus,
+              remark: remark,
+              photos: [...photos],
+              batches: acceptedBatches,
+              vehicleId: vehicle.id,
+              tempAnomalies: vehicle.anomalies.map(a => ({
+                id: a.id,
+                startTime: a.startTime,
+                endTime: a.endTime,
+                duration: a.duration,
+                location: a.location,
+                maxTemp: a.maxTemp,
+                status: a.status,
+                driverRemark: a.driverRemark
+              })),
+              fullTemps: vehicle.fullTemps,
+              driverName: vehicle.driverName,
+              driverPhone: vehicle.driverPhone
+            } as any;
+            addRecord(newRecord);
             Taro.hideLoading();
             Taro.showToast({ title: '验收完成', icon: 'success' });
             setTimeout(() => {
               Taro.switchTab({ url: '/pages/records/index' });
-            }, 1500);
-          }, 1000);
+            }, 1200);
+          }, 600);
         }
       }
     });
