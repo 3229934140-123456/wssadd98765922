@@ -295,6 +295,36 @@
   }
 }
 
+.pickerItemCustom {
+  padding-top: $spacing-md;
+  padding-bottom: $spacing-md;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 12rpx;
+
+  .pickerSub {
+    flex-basis: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    color: $color-text-secondary;
+    padding-left: 44rpx;
+  }
+}
+
+.datePickBtn {
+  position: absolute;
+  right: $spacing-xl;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 12rpx 24rpx;
+  background-color: rgba(0, 136, 204, 0.08);
+  color: $color-primary;
+  border-radius: 999rpx;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
 .activePickerItem {
   color: $color-primary;
   font-weight: $font-weight-medium;

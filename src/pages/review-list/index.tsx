@@ -6,6 +6,7 @@ import styles from './index.module.scss';
 import { useAppStore } from '@/store';
 import { AcceptanceRecord, AcceptanceStatus, AcceptanceResult } from '@/types';
 import { formatFullDateTime } from '@/utils';
+import { currentUser } from '@/data/acceptance';
 
 const ReviewListPage: React.FC = () => {
   const records = useAppStore(s => s.records);
@@ -45,18 +46,22 @@ const ReviewListPage: React.FC = () => {
   const confirmReview = () => {
     if (!pendingRecord || !pendingAction) return;
     const actionText = pendingAction === 'approve' ? '通过入库' : '确认拒收';
+    const defaultRemark = pendingAction === 'approve'
+      ? '现场检查货物未受影响，同意通过入库'
+      : '温度超标时间较长，确认拒收，后续走报废流程';
+    let finalRemark = reviewRemark.trim();
+    if (!finalRemark) {
+      finalRemark = defaultRemark;
+    }
+    const newStatus = pendingAction === 'approve' ? 'accepted' : 'rejected';
+    const newResult = pendingAction === 'approve' ? 'normal' : 'partial';
     Taro.showModal({
       title: `确认${actionText}`,
-      content: reviewRemark || '确认不填写复核备注？',
+      content: `复核意见：${finalRemark}\n确认提交后将同步给门店收货员`,
       success: (res) => {
         if (res.confirm) {
-          if (pendingAction === 'approve') {
-            updateRecordStatus(pendingRecord.id, 'accepted' as AcceptanceStatus, 'normal' as AcceptanceResult, reviewRemark);
-            Taro.showToast({ title: '已通过入库', icon: 'success' });
-          } else {
-            updateRecordStatus(pendingRecord.id, 'rejected' as AcceptanceStatus, 'partial' as AcceptanceResult, reviewRemark);
-            Taro.showToast({ title: '已确认拒收', icon: 'success' });
-          }
+          updateRecordStatus(pendingRecord.id, newStatus as AcceptanceStatus, newResult as AcceptanceResult, finalRemark);
+          Taro.showToast({ title: actionText + '成功', icon: 'success' });
           setShowModal(false);
           setPendingRecord(null);
           setPendingAction(null);

@@ -62,7 +62,7 @@ export const useAppStore = create<AppStore>()(
             ...(result !== undefined ? { result } : {}),
             ...(reviewRemark ? {
               reviewRemark,
-              reviewer: '张主管',
+              reviewer: currentUser.name,
               reviewTime: new Date().toISOString()
             } : {})
           } as AcceptanceRecord;

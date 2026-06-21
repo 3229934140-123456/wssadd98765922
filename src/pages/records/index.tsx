@@ -1,12 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, Button, ScrollView } from '@tarojs/components';
+import { View, Text, Button, ScrollView, Picker } from '@tarojs/components';
 import Taro, { useDidShow } from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
 import RecordCard from '@/components/RecordCard';
 import { useAppStore } from '@/store';
 import { AcceptanceRecord, AcceptanceResult, AcceptanceStatus } from '@/types';
-import { currentUser } from '@/data/acceptance';
 
 type DateRangeKey = 'today' | 'week' | 'custom';
 type ViewMode = 'list' | 'ledger';
@@ -118,8 +117,10 @@ const RecordsPage: React.FC = () => {
   };
 
   const handlePickDate = (value: string) => {
+    if (!value) return;
     setCustomDate(value);
-    setShowDatePicker(false);
+    setDateRange('custom');
+    setTimeout(() => setShowDatePicker(false), 100);
   };
 
   return (
@@ -266,30 +267,51 @@ const RecordsPage: React.FC = () => {
               <Text className={styles.pickerTitle}>选择日期范围</Text>
               <Text className={styles.pickerClose} onClick={() => setShowDatePicker(false)}>✕</Text>
             </View>
-            {(['today', 'week', 'custom'] as DateRangeKey[]).map(k => (
-              <View
-                key={k}
-                className={classnames(styles.pickerItem, dateRange === k && styles.activePickerItem)}
-                onClick={() => {
-                  if (k !== 'custom') {
+            {(['today', 'week', 'custom'] as DateRangeKey[]).map(k => {
+              if (k === 'custom') {
+                return (
+                  <Picker
+                    key={k}
+                    mode="date"
+                    value={customDate}
+                    end={new Date().toISOString().slice(0, 10)}
+                    onChange={(e: any) => {
+                      handlePickDate(e.detail.value);
+                    }}
+                  >
+                    <View
+                      className={classnames(
+                        styles.pickerItem,
+                        styles.pickerItemCustom,
+                        dateRange === k && styles.activePickerItem
+                      )}
+                    >
+                      <Text>指定日期</Text>
+                      <Text className={styles.pickerSub}>
+                        {formatDateKey(customDate)}（点击右侧选择）
+                      </Text>
+                      <View className={styles.datePickBtn}>
+                        <Text>选择日期 ▾</Text>
+                      </View>
+                      {dateRange === k && <Text className={styles.pickerCheck}>✓</Text>}
+                    </View>
+                  </Picker>
+                );
+              }
+              return (
+                <View
+                  key={k}
+                  className={classnames(styles.pickerItem, dateRange === k && styles.activePickerItem)}
+                  onClick={() => {
                     setDateRange(k);
                     setShowDatePicker(false);
-                  } else {
-                    const input = document.createElement('input');
-                    input.type = 'date';
-                    input.value = customDate;
-                    input.onchange = (e: any) => handlePickDate(e.target.value);
-                    input.click();
-                    setDateRange('custom');
-                    setShowDatePicker(false);
-                  }
-                }}
-              >
-                <Text>{k === 'today' ? '今天' : k === 'week' ? '本周' : '指定日期'}</Text>
-                {k === 'custom' && <Text className={styles.pickerSub}>{formatDateKey(customDate)}</Text>}
-                {dateRange === k && <Text className={styles.pickerCheck}>✓</Text>}
-              </View>
-            ))}
+                  }}
+                >
+                  <Text>{k === 'today' ? '今天' : '本周'}</Text>
+                  {dateRange === k && <Text className={styles.pickerCheck}>✓</Text>}
+                </View>
+              );
+            })}
           </View>
         </View>
       )}

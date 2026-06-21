@@ -57,28 +57,45 @@ const RecordDetailPage: React.FC = () => {
   useDidShow(() => {
     const id = router.params.id as string;
     const r = records.find(item => item.id === id);
-    if (r) setRecord(r);
+    if (r) {
+      setRecord(r);
+      if (router.params.from === 'share' && r.status === 'reviewing') {
+        setTimeout(() => {
+          Taro.showToast({
+            title: '您有一条待复核验收单',
+            icon: 'none',
+            duration: 2500
+          });
+        }, 400);
+      }
+    }
   });
 
   useShareAppMessage(() => {
+    Taro.showShareMenu({
+      withShareTicket: true,
+      menus: ['shareAppMessage', 'shareTimeline']
+    } as any);
+    if (record?.id) {
+      markRecordShared(record.id);
+      setRecord(prev => prev ? { ...prev, sharedWithManager: true, sharedTime: new Date().toISOString() } : prev);
+    }
     if (!record) {
       return {
-        title: '验收记录',
-        path: '/pages/record-detail/index'
+        title: '验收记录 - 冷链温度追踪',
+        path: '/pages/records/index'
       };
     }
     const anomalyCount = record.tempAnomalies?.length || 0;
     const statusText = getResultTitle(record.result, record.status);
+    const anomalySummary = anomalyCount > 0
+      ? record.tempAnomalies!.slice(0, 2).map(a => `${formatTempUtil(a.maxTemp)}@${a.location.slice(0, 6)}`).join(' ')
+      : '';
+    const remarkShort = record.remark ? `｜${record.remark.slice(0, 15)}${record.remark.length > 15 ? '…' : ''}` : '';
     return {
-      title: `${statusText}｜${record.deliveryNo}｜${record.storeName}`,
-      path: `/pages/record-detail/index?id=${record.id}&shared=1`,
-      desc: anomalyCount > 0
-        ? `${record.receiver}提交，异常${anomalyCount}次，请主管复核`
-        : `${record.receiver}提交，请查看`,
-      imageUrl: '',
-      success() {
-        if (record?.id) markRecordShared(record.id);
-      }
+      title: `${statusText}｜${record.deliveryNo}｜${record.storeName}${anomalyCount > 0 ? `｜异常${anomalyCount}次${anomalySummary}` : ''}${remarkShort}`,
+      path: `/pages/record-detail/index?id=${record.id}&from=share`,
+      imageUrl: ''
     };
   });
 
@@ -104,19 +121,39 @@ const RecordDetailPage: React.FC = () => {
   };
 
   const triggerShare = () => {
+    Taro.showShareMenu({
+      withShareTicket: true,
+      menus: ['shareAppMessage', 'shareTimeline']
+    } as any);
     Taro.showActionSheet({
-      itemList: ['转发给主管', '复制详情文字', '取消'],
+      itemList: [
+        '① 发送给主管 / 微信群',
+        '② 复制详情文字（兜底方案）',
+        '取消'
+      ],
       success: (res) => {
         if (res.tapIndex === 0) {
-          if (record?.id) markRecordShared(record.id);
-          Taro.showToast({ title: '已提醒主管查看', icon: 'success' });
-          setRecord(prev => prev ? { ...prev, sharedWithManager: true, sharedTime: new Date().toISOString() } : prev);
-          setTimeout(() => Taro.showShareMenu({ withShareTicket: true } as any), 300);
+          Taro.showModal({
+            title: '分享步骤',
+            content: '请点击右上角「…」选择转发，或点击页面上的「📤 转发」按钮，即可发送给主管或工作群。分享卡片会自动包含配送单号、异常温度和备注。',
+            showCancel: false,
+            confirmText: '知道了',
+            success: () => {
+              if (record?.id) {
+                markRecordShared(record.id);
+                setRecord(prev => prev ? { ...prev, sharedWithManager: true, sharedTime: new Date().toISOString() } : prev);
+              }
+            }
+          });
         } else if (res.tapIndex === 1) {
           Taro.setClipboardData({
             data: shareText,
-            success: () => Taro.showToast({ title: '已复制详情', icon: 'success' })
+            success: () => Taro.showToast({ title: '已复制详情，可粘贴到微信', icon: 'success' })
           });
+          if (record?.id) {
+            markRecordShared(record.id);
+            setRecord(prev => prev ? { ...prev, sharedWithManager: true, sharedTime: new Date().toISOString() } : prev);
+          }
         }
       }
     });
@@ -131,23 +168,38 @@ const RecordDetailPage: React.FC = () => {
   const confirmReview = () => {
     if (!record || !pendingAction) return;
     const actionText = pendingAction === 'approve' ? '通过入库' : '确认拒收';
+    const defaultRemark = pendingAction === 'approve'
+      ? '现场检查货物未受影响，同意通过入库'
+      : '温度超标时间较长，确认拒收，后续走报废流程';
+    let finalRemark = reviewRemark.trim();
+    if (!finalRemark) {
+      finalRemark = defaultRemark;
+    }
+    const newStatus = pendingAction === 'approve' ? 'accepted' : 'rejected';
+    const newResult = pendingAction === 'approve' ? 'normal' : 'partial';
+    const now = new Date().toISOString();
+    const updatedRecord: AcceptanceRecord = {
+      ...record,
+      status: newStatus,
+      result: newResult,
+      reviewRemark: finalRemark,
+      reviewer: currentUser.name,
+      reviewTime: now
+    };
     Taro.showModal({
       title: `确认${actionText}`,
-      content: reviewRemark || '确认不填写复核备注？',
+      content: `复核意见：${finalRemark}\n确认提交后将无法修改`,
       success: (res) => {
         if (res.confirm) {
-          if (pendingAction === 'approve') {
-            updateRecordStatus(record.id, 'accepted', 'normal', reviewRemark);
-            Taro.showToast({ title: '已通过入库', icon: 'success' });
-          } else {
-            updateRecordStatus(record.id, 'rejected', 'partial', reviewRemark);
-            Taro.showToast({ title: '已确认拒收', icon: 'success' });
-          }
+          updateRecordStatus(record.id, newStatus, newResult, finalRemark);
+          setRecord(updatedRecord);
           setShowRemarkModal(false);
-          setTimeout(() => {
-            const updated = records.find(r => r.id === record.id);
-            if (updated) setRecord({ ...updated });
-          }, 500);
+          setPendingAction(null);
+          setReviewRemark('');
+          Taro.showToast({
+            title: pendingAction === 'approve' ? '已通过入库' : '已确认拒收',
+            icon: 'success'
+          });
         }
       }
     });
@@ -172,14 +224,24 @@ const RecordDetailPage: React.FC = () => {
   return (
     <View className={styles.pageContainer}>
       <View className={styles.topActionBar}>
-        <View
+        <Button
           className={classnames(
             styles.shareMiniBtn,
             isShared && styles.shareMiniBtnShared
           )}
-          onClick={triggerShare}
+          openType="share"
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
         >
-          <Text>{isShared ? '✓ 已提醒主管' : '📤 转发给主管'}</Text>
+          {isShared ? '✓ 已提醒主管' : '📤 转发给主管'}
+        </Button>
+        <View
+          className={classnames(styles.shareMiniBtn, styles.shareMiniBtnAlt)}
+          onClick={triggerShare}
+          style={{ marginLeft: 16 }}
+        >
+          <Text>更多</Text>
         </View>
       </View>
 
@@ -221,9 +283,12 @@ const RecordDetailPage: React.FC = () => {
             </Text>
           </View>
           {!isShared ? (
-            <View className={styles.shareBtnMain} onClick={triggerShare}>
-              <Text>📤 转发</Text>
-            </View>
+            <Button
+              className={styles.shareBtnMain}
+              openType="share"
+            >
+              📤 立即转发
+            </Button>
           ) : (
             <View className={styles.shareDoneBtn}>
               <Text>✓ 已转发</Text>
