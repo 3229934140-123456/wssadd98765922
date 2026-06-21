@@ -549,3 +549,57 @@
   color: $color-text-secondary;
   line-height: 1.5;
 }
+
+.riskCard {
+  background-color: rgba(255, 143, 31, 0.04);
+}
+
+.riskLevel {
+  display: inline-flex;
+  align-items: center;
+  padding: 4rpx 20rpx;
+  border-radius: 999rpx;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+.riskLevelLow {
+  background-color: rgba(0, 181, 120, 0.12);
+  color: $color-success;
+}
+
+.riskLevelMid {
+  background-color: rgba(255, 143, 31, 0.12);
+  color: $color-warning;
+}
+
+.riskLevelHigh {
+  background-color: rgba(245, 63, 63, 0.12);
+  color: $color-error;
+}
+
+.riskItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+  margin-bottom: $spacing-md;
+}
+
+.riskLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.riskValue {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.riskSuggestion {
+  padding: $spacing-md;
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: $radius-md;
+  border-left: 6rpx solid $color-warning;
+  margin-top: $spacing-sm;
+}

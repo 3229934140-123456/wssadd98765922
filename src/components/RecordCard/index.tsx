@@ -92,9 +92,13 @@ const RecordCard: React.FC<RecordCardProps> = ({ record, onClick }) => {
       {record.reviewRemark && (
         <View className={classnames(styles.reviewFooter, record.status === 'rejected' && styles.rejectedReview)}>
           <Text className={styles.reviewFooterText}>
-            {record.status === 'rejected' ? '❌' : '✅'} 主管{record.status === 'rejected' ? '拒收' : '复核通过'}：
-            {record.reviewRemark}
-            {record.reviewer && ` · ${record.reviewer}`}
+            {record.status === 'rejected' ? '❌ 主管确认拒收' : '✅ 主管复核通过'}
+          </Text>
+          <Text className={styles.reviewMeta}>
+            复核人：{record.reviewer || '-'} · 复核时间：{record.reviewTime ? formatFullDateTime(record.reviewTime) : '-'}
+          </Text>
+          <Text className={styles.reviewRemarkSummary}>
+            意见摘要：{record.reviewRemark.length > 30 ? record.reviewRemark.slice(0, 30) + '…' : record.reviewRemark}
           </Text>
         </View>
       )}

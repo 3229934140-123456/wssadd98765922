@@ -366,6 +366,58 @@ const RecordDetailPage: React.FC = () => {
         </View>
       )}
 
+      {anomalies.length > 0 && (() => {
+        const totalDuration = anomalies.reduce((sum, a) => sum + a.duration, 0);
+        const maxAnomaly = anomalies.reduce((prev, cur) => cur.maxTemp > prev.maxTemp ? cur : prev, anomalies[0]);
+        const hasDanger = anomalies.some(a => a.status === 'danger');
+        const riskLevel = hasDanger ? 'high' : 'mid';
+        const riskLabel = hasDanger ? '高风险' : '中风险';
+        const riskLevelCls = hasDanger ? styles.riskLevelHigh : styles.riskLevelMid;
+        const suggestion = hasDanger
+          ? '建议拒收或等待主管现场复核确认，重点检查冻品是否出现解冻再冻结现象'
+          : totalDuration >= 30
+            ? '建议重点检查货物包装和表面状态，部分敏感商品可拒收'
+            : '建议抽检货物表面温度，确认无回温后正常入库';
+        const affectedBatches = record.batches.map(b => b.productName).join('、') || '无受影响批次';
+        return (
+          <View className={classnames(styles.sectionCard, styles.riskCard)}>
+            <View className={styles.sectionHeader}>
+              <Text className={styles.sectionTitle}>⚠️ 温度风险摘要</Text>
+              <View className={classnames(styles.riskLevel, riskLevelCls)}>
+                <Text>{riskLabel}</Text>
+              </View>
+            </View>
+            <View className={styles.riskItem}>
+              <Text className={styles.riskLabel}>超标总时长</Text>
+              <Text className={styles.riskValue}>{getDurationText(totalDuration)}</Text>
+            </View>
+            <View className={styles.riskItem}>
+              <Text className={styles.riskLabel}>最高温度</Text>
+              <Text className={styles.riskValue}>{formatTempUtil(maxAnomaly.maxTemp)}（{maxAnomaly.location}，{formatTime(maxAnomaly.startTime)}）</Text>
+            </View>
+            <View className={styles.riskItem}>
+              <Text className={styles.riskLabel}>影响批次</Text>
+              <Text className={styles.riskValue}>{affectedBatches}</Text>
+            </View>
+            <View className={styles.riskSuggestion}>
+              <Text className={styles.riskValue}>💡 {suggestion}</Text>
+            </View>
+          </View>
+        );
+      })()}
+
+      {anomalies.length === 0 && record.tempAnomalies && (
+        <View className={classnames(styles.sectionCard, styles.riskCard)}>
+          <Text className={styles.sectionTitle}>✅ 温度风险摘要：全程温度正常</Text>
+          <View className={styles.riskItem} style={{ marginTop: 16 }}>
+            <Text className={styles.riskValue}>正常入库，无需特殊处理</Text>
+          </View>
+          <View className={classnames(styles.riskLevel, styles.riskLevelLow)}>
+            <Text>低风险</Text>
+          </View>
+        </View>
+      )}
+
       <View className={styles.sectionCard}>
         <View className={styles.sectionHeader}>
           <Text className={styles.sectionTitle}>到货批次</Text>

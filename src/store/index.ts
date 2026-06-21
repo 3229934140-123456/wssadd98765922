@@ -13,6 +13,7 @@ interface AppStore {
   records: AcceptanceRecord[];
   addRecord: (record: AcceptanceRecord) => void;
   updateRecordStatus: (id: string, status: AcceptanceStatus, result?: AcceptanceResult, reviewRemark?: string) => void;
+  batchUpdateRecords: (ids: string[], status: AcceptanceStatus, result: AcceptanceResult, reviewRemark: string) => void;
   markRecordShared: (id: string) => void;
 
   stores: { no: string; name: string }[];
@@ -65,6 +66,19 @@ export const useAppStore = create<AppStore>()(
               reviewer: currentUser.name,
               reviewTime: new Date().toISOString()
             } : {})
+          } as AcceptanceRecord;
+        })
+      })),
+      batchUpdateRecords: (ids, status, result, reviewRemark) => set((state) => ({
+        records: state.records.map(r => {
+          if (!ids.includes(r.id)) return r;
+          return {
+            ...r,
+            status,
+            result,
+            reviewRemark,
+            reviewer: currentUser.name,
+            reviewTime: new Date().toISOString()
           } as AcceptanceRecord;
         })
       })),

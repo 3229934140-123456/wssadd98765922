@@ -6,6 +6,8 @@ import styles from './index.module.scss';
 import RecordCard from '@/components/RecordCard';
 import { useAppStore } from '@/store';
 import { AcceptanceRecord, AcceptanceResult, AcceptanceStatus } from '@/types';
+import { formatFullDateTime } from '@/utils';
+import { getTempStatusText } from '@/utils/temperature';
 
 type DateRangeKey = 'today' | 'week' | 'custom';
 type ViewMode = 'list' | 'ledger';
@@ -97,6 +99,62 @@ const RecordsPage: React.FC = () => {
     const s = stores.find(x => x.no === storeFilter);
     return s ? `${s.name} (${s.no})` : storeFilter;
   }, [storeFilter, stores]);
+
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [summaryText, setSummaryText] = useState('');
+
+  const getResultText = (r: AcceptanceRecord): string => {
+    if (r.status === 'rejected') return '已拒收';
+    if (r.status === 'reviewing') return '待复核';
+    if (r.result === 'partial') return '部分拒收';
+    return '正常入库';
+  };
+
+  const getReviewSummary = (r: AcceptanceRecord): string => {
+    if (!r.reviewer) return '-';
+    const remark = r.reviewRemark ? `：${r.reviewRemark.length > 15 ? r.reviewRemark.slice(0, 15) + '...' : r.reviewRemark}` : '';
+    return `${r.reviewer}${remark}`;
+  };
+
+  const generateSummary = () => {
+    const data = storeFiltered;
+    if (data.length === 0) {
+      Taro.showToast({ title: '当前无数据可汇总', icon: 'none' });
+      return;
+    }
+    const dateLabel = dateRangeLabel;
+    const storeLabel2 = storeLabel;
+    const normalCount = data.filter(r => r.result === 'normal' && r.status === 'accepted').length;
+    const abnormalCount = data.length - normalCount;
+    const lines: string[] = [];
+    lines.push(`📊 收货台账汇总`);
+    lines.push(`日期：${dateLabel}`);
+    lines.push(`门店：${storeLabel2}`);
+    lines.push(`总单数：${data.length}  正常：${normalCount}  异常：${abnormalCount}`);
+    lines.push('─'.repeat(30));
+    lines.push('序号 | 配送单号 | 温度结论 | 验收结果 | 复核结论');
+    lines.push('─'.repeat(30));
+    data.forEach((r, i) => {
+      const tempText = getTempStatusText(r.tempCompliance).replace('温度', '');
+      const resultText = getResultText(r);
+      const reviewText = getReviewSummary(r);
+      lines.push(`${i + 1}. ${r.deliveryNo}  ${tempText}  ${resultText}  ${reviewText}`);
+    });
+    lines.push('─'.repeat(30));
+    lines.push(`生成时间：${formatFullDateTime(new Date().toISOString())}`);
+    const text = lines.join('\n');
+    setSummaryText(text);
+    setShowSummaryModal(true);
+  };
+
+  const copySummary = () => {
+    Taro.setClipboardData({
+      data: summaryText,
+      success: () => {
+        Taro.showToast({ title: '已复制到剪贴板', icon: 'success' });
+      }
+    });
+  };
 
   const ledgerGroups = useMemo(() => {
     const map = new Map<string, AcceptanceRecord[]>();
@@ -205,6 +263,14 @@ const RecordsPage: React.FC = () => {
           </View>
         )}
       </View>
+
+      {viewMode === 'ledger' && (
+        <View className={styles.summaryBtnWrap}>
+          <View className={styles.summaryBtn} onClick={generateSummary}>
+            <Text>📊 生成收货汇总</Text>
+          </View>
+        </View>
+      )}
 
       {viewMode === 'list' ? (
         <>
@@ -341,6 +407,21 @@ const RecordsPage: React.FC = () => {
                 {storeFilter === s.no && <Text className={styles.pickerCheck}>✓</Text>}
               </View>
             ))}
+          </View>
+        </View>
+      )}
+
+      {showSummaryModal && (
+        <View className={styles.summaryModal}>
+          <View className={styles.summaryModalHeader}>
+            <Text className={styles.summaryModalTitle}>收货汇总预览</Text>
+            <Text className={styles.summaryModalClose} onClick={() => setShowSummaryModal(false)}>✕</Text>
+          </View>
+          <ScrollView scrollY className={styles.summaryContent}>
+            <Text className={styles.summaryContentText}>{summaryText}</Text>
+          </ScrollView>
+          <View className={styles.summaryCopyBtn} onClick={copySummary}>
+            <Text className={styles.summaryCopyBtnText}>复制到剪贴板</Text>
           </View>
         </View>
       )}

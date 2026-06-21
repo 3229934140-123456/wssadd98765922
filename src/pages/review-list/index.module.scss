@@ -65,6 +65,12 @@
   padding: $spacing-sm $page-spacing;
 }
 
+.sectionLeft {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
 .sectionTitle {
   font-size: $font-size-base;
   font-weight: $font-weight-semibold;
@@ -302,4 +308,120 @@
 .emptySub {
   font-size: $font-size-sm;
   color: $color-text-disabled;
+}
+
+.batchModeToggle {
+  padding: 10rpx 24rpx;
+  border-radius: 999rpx;
+  background-color: $color-bg-hover;
+  border: 2rpx solid $color-divider;
+}
+
+.batchModeToggleText {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.batchModeActive {
+  background-color: rgba(0, 136, 204, 0.1);
+  border-color: $color-primary;
+
+  .batchModeToggleText {
+    color: $color-primary;
+  }
+}
+
+.listWithBatch {
+  padding-bottom: 180rpx;
+}
+
+.checkBox {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 8rpx;
+  border: 2rpx solid $color-divider;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: $spacing-sm;
+  flex-shrink: 0;
+}
+
+.checkedBox {
+  background-color: $color-primary;
+  border-color: $color-primary;
+}
+
+.checkBoxText {
+  font-size: 24rpx;
+  color: $color-text-tertiary;
+}
+
+.checkedBox .checkBoxText {
+  color: #fff;
+}
+
+.batchBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #fff;
+  padding: $spacing-md $page-spacing;
+  padding-bottom: calc(env(safe-area-inset-bottom) + $spacing-md);
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 100;
+}
+
+.batchCount {
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+}
+
+.batchBarActions {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.batchApproveBtn {
+  padding: 16rpx 32rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #00B578 0%, #00C78A 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.batchRejectBtn {
+  padding: 16rpx 32rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #F53F3F 0%, #FF5B5B 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.batchBtnText {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: #fff;
+}
+
+.modalSub {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-md;
 }
