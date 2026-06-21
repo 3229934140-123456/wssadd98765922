@@ -13,6 +13,7 @@ interface AppStore {
   records: AcceptanceRecord[];
   addRecord: (record: AcceptanceRecord) => void;
   updateRecordStatus: (id: string, status: AcceptanceStatus, result?: AcceptanceResult, reviewRemark?: string) => void;
+  markRecordShared: (id: string) => void;
 
   stores: { no: string; name: string }[];
 }
@@ -65,6 +66,14 @@ export const useAppStore = create<AppStore>()(
               reviewTime: new Date().toISOString()
             } : {})
           } as AcceptanceRecord;
+        })
+      })),
+
+      markRecordShared: (id) => set((state) => ({
+        records: state.records.map(r => r.id !== id ? r : {
+          ...r,
+          sharedWithManager: true,
+          sharedTime: new Date().toISOString()
         })
       })),
 

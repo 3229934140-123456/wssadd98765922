@@ -9,7 +9,7 @@ import StatusTag from '@/components/StatusTag';
 import { getVehicleByDeliveryNo } from '@/data/vehicles';
 import { currentUser } from '@/data/acceptance';
 import { Vehicle, AcceptanceResult, AcceptanceStatus, BatchInfo, AcceptanceRecord } from '@/types';
-import { formatTime, getDurationText } from '@/utils';
+import { formatTime, getDurationText, persistPhotos } from '@/utils';
 import { checkTempsCompliance, getTempStatusText, formatTemp, getTempRange } from '@/utils/temperature';
 import { useAppStore } from '@/store';
 
@@ -102,12 +102,13 @@ const AcceptancePage: React.FC = () => {
     Taro.showModal({
       title: '确认提交',
       content: `确认将此批货物标记为"${resultText}"吗？`,
-      success: (res) => {
+      success: async (res) => {
         if (res.confirm) {
           Taro.showLoading({ title: '提交中...' });
-          setTimeout(() => {
+          try {
             const acceptedBatches = vehicle.batches.filter(b => checkedBatches.includes(b.batchNo));
             const status: AcceptanceStatus = selectedResult === 'review' ? 'reviewing' : 'accepted';
+            const savedPhotos = photos.length > 0 ? await persistPhotos(photos) : [];
             const newRecord: AcceptanceRecord = {
               id: 'R' + Date.now(),
               deliveryNo: vehicle.deliveryNo,
@@ -122,7 +123,7 @@ const AcceptancePage: React.FC = () => {
               tempZone: vehicle.tempZone,
               tempCompliance: tempStatus,
               remark: remark,
-              photos: [...photos],
+              photos: savedPhotos,
               batches: acceptedBatches,
               vehicleId: vehicle.id,
               tempAnomalies: vehicle.anomalies.map(a => ({
@@ -145,7 +146,10 @@ const AcceptancePage: React.FC = () => {
             setTimeout(() => {
               Taro.switchTab({ url: '/pages/records/index' });
             }, 1200);
-          }, 600);
+          } catch (err) {
+            Taro.hideLoading();
+            Taro.showToast({ title: '提交失败，请重试', icon: 'none' });
+          }
         }
       }
     });

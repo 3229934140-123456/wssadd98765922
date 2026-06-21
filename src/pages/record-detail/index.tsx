@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, Image, Button, Textarea } from '@tarojs/components';
-import Taro, { useRouter, useDidShow } from '@tarojs/taro';
+import Taro, { useRouter, useDidShow, useShareAppMessage } from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
 import TempFullChart from '@/components/TempFullChart';
@@ -11,6 +11,7 @@ import { AcceptanceRecord, AcceptanceResult, AcceptanceStatus } from '@/types';
 import { formatFullDateTime, formatTime, getDurationText } from '@/utils';
 import { getTempStatusText, formatTemp } from '@/utils/temperature';
 import { currentUser } from '@/data/acceptance';
+import { formatTemp as formatTempUtil } from '@/utils/temperature';
 
 const getResultBannerClass = (result: AcceptanceResult, status: AcceptanceStatus) => {
   if (status === 'rejected') return styles.rejectedBanner;
@@ -48,6 +49,7 @@ const RecordDetailPage: React.FC = () => {
   const [record, setRecord] = useState<AcceptanceRecord | null>(null);
   const records = useAppStore(s => s.records);
   const updateRecordStatus = useAppStore(s => s.updateRecordStatus);
+  const markRecordShared = useAppStore(s => s.markRecordShared);
   const [showRemarkModal, setShowRemarkModal] = useState(false);
   const [pendingAction, setPendingAction] = useState<'approve' | 'reject' | null>(null);
   const [reviewRemark, setReviewRemark] = useState('');
@@ -58,10 +60,65 @@ const RecordDetailPage: React.FC = () => {
     if (r) setRecord(r);
   });
 
+  useShareAppMessage(() => {
+    if (!record) {
+      return {
+        title: '验收记录',
+        path: '/pages/record-detail/index'
+      };
+    }
+    const anomalyCount = record.tempAnomalies?.length || 0;
+    const statusText = getResultTitle(record.result, record.status);
+    return {
+      title: `${statusText}｜${record.deliveryNo}｜${record.storeName}`,
+      path: `/pages/record-detail/index?id=${record.id}&shared=1`,
+      desc: anomalyCount > 0
+        ? `${record.receiver}提交，异常${anomalyCount}次，请主管复核`
+        : `${record.receiver}提交，请查看`,
+      imageUrl: '',
+      success() {
+        if (record?.id) markRecordShared(record.id);
+      }
+    };
+  });
+
+  const shareText = useMemo(() => {
+    if (!record) return '';
+    const anomalyCount = record.tempAnomalies?.length || 0;
+    const batchCount = record.batches?.length || 0;
+    const t = record.tempAnomalies?.map(a => `${formatTime(a.startTime)}@${a.location}峰值${formatTempUtil(a.maxTemp)}持续${getDurationText(a.duration)}`).join('；') || '';
+    return [
+      `配送单：${record.deliveryNo}`,
+      `门店：${record.storeName}，收货员：${record.receiver}`,
+      `批次：${batchCount}批，异常：${anomalyCount}次`,
+      `备注：${record.remark || '无'}`,
+      t ? `异常详情：${t}` : ''
+    ].filter(Boolean).join('\n');
+  }, [record]);
+
   const handlePreviewPhoto = (url: string, urls: string[]) => {
     Taro.previewImage({
       current: url,
       urls
+    });
+  };
+
+  const triggerShare = () => {
+    Taro.showActionSheet({
+      itemList: ['转发给主管', '复制详情文字', '取消'],
+      success: (res) => {
+        if (res.tapIndex === 0) {
+          if (record?.id) markRecordShared(record.id);
+          Taro.showToast({ title: '已提醒主管查看', icon: 'success' });
+          setRecord(prev => prev ? { ...prev, sharedWithManager: true, sharedTime: new Date().toISOString() } : prev);
+          setTimeout(() => Taro.showShareMenu({ withShareTicket: true } as any), 300);
+        } else if (res.tapIndex === 1) {
+          Taro.setClipboardData({
+            data: shareText,
+            success: () => Taro.showToast({ title: '已复制详情', icon: 'success' })
+          });
+        }
+      }
     });
   };
 
@@ -109,15 +166,36 @@ const RecordDetailPage: React.FC = () => {
   const anomalies = record.tempAnomalies || [];
   const photos = record.photos || [];
   const isReviewing = record.status === 'reviewing';
+  const anomalyCount = anomalies.length;
+  const isShared = !!record.sharedWithManager;
 
   return (
     <View className={styles.pageContainer}>
+      <View className={styles.topActionBar}>
+        <View
+          className={classnames(
+            styles.shareMiniBtn,
+            isShared && styles.shareMiniBtnShared
+          )}
+          onClick={triggerShare}
+        >
+          <Text>{isShared ? '✓ 已提醒主管' : '📤 转发给主管'}</Text>
+        </View>
+      </View>
+
       <View className={classnames(styles.resultBanner, getResultBannerClass(record.result, record.status))}>
         <View className={styles.resultIcon}>
           <Text>{getResultIcon(record.result, record.status)}</Text>
         </View>
         <View className={styles.resultInfo}>
-          <Text className={styles.resultTitle}>{getResultTitle(record.result, record.status)}</Text>
+          <View style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <Text className={styles.resultTitle}>{getResultTitle(record.result, record.status)}</Text>
+            {isShared && (
+              <View className={styles.sharedBadge}>
+                <Text>已转发给主管</Text>
+              </View>
+            )}
+          </View>
           <Text className={styles.resultDesc}>
             配送单 {record.deliveryNo} · {record.plateNo}
           </Text>
@@ -126,6 +204,33 @@ const RecordDetailPage: React.FC = () => {
           </Text>
         </View>
       </View>
+
+      {isReviewing && (
+        <View className={styles.shareBlock}>
+          <View className={styles.shareIconWrap}>
+            <Text>📤</Text>
+          </View>
+          <View className={styles.shareContent}>
+            <Text className={styles.shareTitle}>
+              {isShared ? '已转发给主管，等待处理' : '把异常情况发送给主管'}
+            </Text>
+            <Text className={styles.shareDesc}>
+              {anomalyCount > 0
+                ? `${record.receiver}提交，异常${anomalyCount}次${record.sharedTime ? ` · 转发时间${formatFullDateTime(record.sharedTime!)}` : '，主管点进来可直接复核'}
+                : '转发后可直接在微信/群聊通知主管处理'}
+            </Text>
+          </View>
+          {!isShared ? (
+            <View className={styles.shareBtnMain} onClick={triggerShare}>
+              <Text>📤 转发</Text>
+            </View>
+          ) : (
+            <View className={styles.shareDoneBtn}>
+              <Text>✓ 已转发</Text>
+            </View>
+          )}
+        </View>
+      )}
 
       <View className={styles.sectionCard}>
         <View className={styles.sectionHeader}>

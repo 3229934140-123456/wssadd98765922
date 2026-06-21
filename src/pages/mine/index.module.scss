@@ -154,3 +154,21 @@
   font-size: $font-size-xs;
   color: $color-text-disabled;
 }
+
+.badge {
+  min-width: 36rpx;
+  height: 36rpx;
+  padding: 0 10rpx;
+  border-radius: 999rpx;
+  background-color: $color-danger;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badgeText {
+  font-size: 22rpx;
+  color: #fff;
+  font-weight: $font-weight-bold;
+  line-height: 1;
+}

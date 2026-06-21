@@ -59,6 +59,22 @@
   color: $color-primary;
 }
 
+.rejected {
+  background-color: rgba(245, 63, 63, 0.1);
+  color: $color-danger;
+}
+
+.sharedTag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4rpx 14rpx;
+  background-color: rgba(0, 181, 120, 0.08);
+  color: $color-success;
+  font-size: 20rpx;
+  border-radius: $radius-xs;
+  font-weight: $font-weight-medium;
+}
+
 .infoRow {
   display: flex;
   align-items: center;
@@ -118,4 +134,21 @@
   border-radius: $radius-xs;
   font-size: 20rpx;
   color: $color-text-secondary;
+}
+
+.reviewFooter {
+  margin-top: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background: linear-gradient(135deg, rgba(0, 181, 120, 0.08) 0%, rgba(0, 181, 120, 0.02) 100%);
+  border-radius: $radius-md;
+}
+
+.rejectedReview {
+  background: linear-gradient(135deg, rgba(245, 63, 63, 0.08) 0%, rgba(245, 63, 63, 0.02) 100%);
+}
+
+.reviewFooterText {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  line-height: 1.6;
 }

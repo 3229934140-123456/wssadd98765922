@@ -7,23 +7,26 @@
   box-sizing: border-box;
 }
 
-.filterBar {
+.topBar {
   display: flex;
   align-items: center;
-  gap: $spacing-sm;
+  justify-content: center;
   padding: $spacing-md $page-spacing;
   background-color: $color-bg-card;
   border-bottom: 1rpx solid $color-divider;
-  position: sticky;
-  top: 0;
-  z-index: 10;
 }
 
-.filterBtn {
-  @include button-reset;
-  padding: 12rpx 28rpx;
+.viewTabs {
+  display: flex;
   background-color: $color-bg-hover;
-  border-radius: $radius-button;
+  border-radius: 999rpx;
+  padding: 6rpx;
+  gap: 6rpx;
+}
+
+.viewTab {
+  padding: 14rpx 48rpx;
+  border-radius: 999rpx;
   font-size: $font-size-sm;
   color: $color-text-secondary;
   transition: all $transition-base;
@@ -33,10 +36,55 @@
   }
 }
 
-.activeFilter {
-  background-color: rgba(0, 136, 204, 0.1);
+.activeViewTab {
+  background-color: #fff;
   color: $color-primary;
   font-weight: $font-weight-medium;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.filterRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md $page-spacing;
+  background-color: $color-bg-card;
+}
+
+.filterChip {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 14rpx 24rpx;
+  background-color: $color-bg-hover;
+  border-radius: 999rpx;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+
+  &:active {
+    opacity: 0.85;
+  }
+}
+
+.filterChipText {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+}
+
+.filterChipArrow {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+}
+
+.ledgerSummary {
+  padding: $spacing-sm $page-spacing;
+  display: flex;
+  align-items: center;
+}
+
+.ledgerSummaryText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
 }
 
 .statCards {
@@ -44,6 +92,12 @@
   grid-template-columns: repeat(4, 1fr);
   gap: $spacing-md;
   padding: $spacing-lg $page-spacing;
+}
+
+.statCards5 {
+  grid-template-columns: repeat(5, 1fr);
+  padding: $spacing-md $page-spacing $spacing-lg;
+  gap: $spacing-sm;
 }
 
 .statCard {
@@ -55,6 +109,30 @@
   align-items: center;
   gap: $spacing-xs;
   box-shadow: $shadow-card;
+  border: 3rpx solid transparent;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.statCards5 .statCard {
+  padding: $spacing-sm $spacing-xs;
+  border-radius: $radius-sm;
+}
+
+.statCards5 .statNumber {
+  font-size: $font-size-xl;
+}
+
+.statCards5 .statLabel {
+  font-size: 20rpx;
+}
+
+.activeStat {
+  border-color: $color-primary;
+  background-color: rgba(0, 136, 204, 0.04);
 }
 
 .statNumber {
@@ -80,12 +158,42 @@
   color: $color-primary;
 }
 
+.statRejected .statNumber {
+  color: $color-danger;
+}
+
 .statToday .statNumber {
   color: $color-primary-dark;
 }
 
 .recordList {
   padding: 0 $page-spacing;
+}
+
+.ledgerList {
+  padding: 0 $page-spacing;
+}
+
+.ledgerGroup {
+  margin-bottom: $spacing-lg;
+}
+
+.ledgerDateHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-sm 0;
+}
+
+.ledgerDate {
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.ledgerDateCount {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
 }
 
 .sectionHeader {
@@ -129,4 +237,79 @@
 .emptySubtext {
   font-size: $font-size-sm;
   color: $color-text-disabled;
+}
+
+.mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.pickerSheet {
+  width: 100%;
+  max-height: 70vh;
+  background-color: #fff;
+  border-top-left-radius: $radius-lg;
+  border-top-right-radius: $radius-lg;
+  padding-bottom: calc(env(safe-area-inset-bottom) + $spacing-md);
+  display: flex;
+  flex-direction: column;
+}
+
+.pickerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-lg $page-spacing $spacing-md;
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.pickerTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.pickerClose {
+  font-size: $font-size-xl;
+  color: $color-text-tertiary;
+  padding: $spacing-sm;
+}
+
+.pickerItem {
+  display: flex;
+  align-items: center;
+  padding: $spacing-md $page-spacing;
+  gap: $spacing-sm;
+  position: relative;
+
+  &:active {
+    background-color: $color-bg-hover;
+  }
+}
+
+.activePickerItem {
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.pickerSub {
+  margin-left: auto;
+  margin-right: $spacing-lg;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.pickerCheck {
+  position: absolute;
+  right: $page-spacing;
+  color: $color-primary;
+  font-weight: $font-weight-bold;
 }

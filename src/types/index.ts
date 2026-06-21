@@ -92,4 +92,6 @@ export interface AcceptanceRecord {
   reviewer?: string;
   reviewTime?: string;
   reviewRemark?: string;
+  sharedWithManager?: boolean;
+  sharedTime?: string;
 }

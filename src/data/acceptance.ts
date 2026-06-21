@@ -1,6 +1,7 @@
 export const currentUser = {
-  name: '陈收货',
-  role: '收货员',
+  name: '张主管',
+  role: 'store_manager',
+  roleName: '门店主管',
   storeNo: 'SH001',
   storeName: '上海浦东店',
   phone: '138****0001',

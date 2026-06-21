@@ -7,6 +7,41 @@
   box-sizing: border-box;
 }
 
+.topActionBar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: $color-bg-page;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: $spacing-sm $page-spacing;
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.shareMiniBtn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 24rpx;
+  background-color: rgba(0, 136, 204, 0.08);
+  border-radius: 999rpx;
+  font-size: $font-size-xs;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.8;
+    transform: scale(0.98);
+  }
+}
+
+.shareMiniBtnShared {
+  background-color: rgba(0, 181, 120, 0.08);
+  color: $color-success;
+}
+
 .resultBanner {
   padding: $spacing-xl $page-spacing;
   display: flex;
@@ -373,6 +408,91 @@
 .approveBtn {
   background: linear-gradient(135deg, $color-success 0%, #00C78A 100%);
   color: $color-text-white;
+}
+
+.shareBlock {
+  margin: $spacing-md $page-spacing 0;
+  padding: $spacing-md $spacing-lg;
+  background: linear-gradient(135deg, rgba(0, 136, 204, 0.08) 0%, rgba(0, 136, 204, 0.02) 100%);
+  border: 2rpx dashed rgba(0, 136, 204, 0.3);
+  border-radius: $radius-lg;
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.shareIconWrap {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: $radius-md;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.shareContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.shareTitle {
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.shareDesc {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.shareBtnMain {
+  padding: 18rpx 32rpx;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: #fff;
+  border-radius: 999rpx;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.85;
+    transform: scale(0.98);
+  }
+}
+
+.shareDoneBtn {
+  padding: 18rpx 32rpx;
+  background: rgba(0, 181, 120, 0.12);
+  color: $color-success;
+  border-radius: 999rpx;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.sharedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 6rpx 16rpx;
+  background-color: rgba(0, 181, 120, 0.08);
+  color: $color-success;
+  font-size: 22rpx;
+  border-radius: 999rpx;
+  font-weight: $font-weight-medium;
+  margin-top: 8rpx;
 }
 
 .reviewedInfo {

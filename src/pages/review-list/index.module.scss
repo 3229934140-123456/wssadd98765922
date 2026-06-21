@@ -1,0 +1,305 @@
+@use '@/styles/variables.scss' as *;
+
+.pageContainer {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 20rpx);
+  box-sizing: border-box;
+}
+
+.headerBar {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  padding: 32rpx $page-spacing 48rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.headerTitle {
+  font-size: $font-size-xxl;
+  color: #fff;
+  font-weight: $font-weight-bold;
+}
+
+.headerSub {
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-md;
+  margin: -32rpx $page-spacing $spacing-lg;
+}
+
+.statCard {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md $spacing-lg;
+  box-shadow: $shadow-card;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.statCardNumber {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+}
+
+.statCardWarn .statCardNumber {
+  color: $color-danger;
+}
+
+.statCardLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-sm $page-spacing;
+}
+
+.sectionTitle {
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.sectionCount {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.list {
+  padding: 0 $page-spacing;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.card {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.cardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.cardLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.deliveryNo {
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.meta {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.statusTag {
+  padding: 6rpx 20rpx;
+  border-radius: 999rpx;
+  background-color: rgba(0, 136, 204, 0.1);
+  color: $color-primary;
+  font-size: 22rpx;
+  font-weight: $font-weight-medium;
+}
+
+.anomalyBadge {
+  padding: 6rpx 20rpx;
+  border-radius: 999rpx;
+  background-color: rgba(245, 63, 63, 0.1);
+  color: $color-danger;
+  font-size: 22rpx;
+  font-weight: $font-weight-medium;
+}
+
+.remarkBox {
+  background-color: $color-bg-hover;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.remarkIcon {
+  font-size: 28rpx;
+}
+
+.remarkText {
+  flex: 1;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.6;
+}
+
+.actionRow {
+  display: flex;
+  gap: $spacing-sm;
+  padding-top: $spacing-sm;
+  border-top: 1rpx solid $color-divider;
+}
+
+.btnView {
+  flex: 1;
+  height: 72rpx;
+  border-radius: 999rpx;
+  background-color: $color-bg-hover;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  line-height: 72rpx;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnReject {
+  flex: 1;
+  height: 72rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #F53F3F 0%, #FF5B5B 100%);
+  color: #fff;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  line-height: 72rpx;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnApprove {
+  flex: 1;
+  height: 72rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #00B578 0%, #00C78A 100%);
+  color: #fff;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  line-height: 72rpx;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalMask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 32rpx;
+  box-sizing: border-box;
+}
+
+.modalBody {
+  width: 100%;
+  max-width: 686rpx;
+  background-color: #fff;
+  border-radius: 24rpx;
+  padding: $spacing-xl;
+  box-sizing: border-box;
+}
+
+.modalTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.modalTextarea {
+  width: 100%;
+  min-height: 200rpx;
+  padding: $spacing-md;
+  background-color: $color-bg-hover;
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  box-sizing: border-box;
+}
+
+.modalButtons {
+  display: flex;
+  gap: $spacing-sm;
+  margin-top: $spacing-lg;
+}
+
+.modalCancel {
+  flex: 1;
+  height: 80rpx;
+  border-radius: 999rpx;
+  background-color: $color-bg-hover;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  line-height: 80rpx;
+  padding: 0;
+}
+
+.modalSubmit {
+  flex: 1;
+  height: 80rpx;
+  border-radius: 999rpx;
+  color: #fff;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  line-height: 80rpx;
+  padding: 0;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 160rpx $page-spacing;
+}
+
+.emptyIcon {
+  font-size: 160rpx;
+  opacity: 0.4;
+  margin-bottom: $spacing-md;
+}
+
+.emptyText {
+  font-size: $font-size-base;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-xs;
+}
+
+.emptySub {
+  font-size: $font-size-sm;
+  color: $color-text-disabled;
+}
